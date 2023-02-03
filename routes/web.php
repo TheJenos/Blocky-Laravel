@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BlocklyController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,7 +18,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
-Route::get('/blocky', function () {
-    return view('blocky');
-});
+Route::get('/blocky', [BlocklyController::class, 'index']);
+Route::post('/blocky/json', [BlocklyController::class, 'store']);
+Route::get('/blocky/json', [BlocklyController::class, 'show']);
