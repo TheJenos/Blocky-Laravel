@@ -15,8 +15,7 @@ class BlocklyController extends Controller
     function store(Request $request)
     {
         file_put_contents(base_path('/blockly/route.xml'), $request->get('data'));
-        file_put_contents(base_path('/routes/blockly.php'), $request->get('code'));
-        file_put_contents(base_path('/routes/blockly.php'), "<?php\n\n{$request->get('code')}");
+        // file_put_contents(base_path('/routes/blockly.php'), "<?php\n\n{$request->get('code')}");
         return response()->json(['status' => 'succuss']);
     }
 

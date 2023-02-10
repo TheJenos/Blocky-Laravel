@@ -308,25 +308,30 @@ window.addEventListener('resize', onresize, false);
 onresize();
 Blockly.svgResize(workspace);
 
-let textToDom = Blockly.Xml.textToDom(localStorage.getItem('routeData') || '<xml xmlns="https://developers.google.com/blockly/xml"></xml>');
-Blockly.Xml.domToWorkspace(workspace, textToDom);
-
+let waitUntilLoad = false
 axios.get('/blocky/json').then((response) => {
     let textToDom = Blockly.Xml.textToDom(response.data.data);
     workspace.clear();
     Blockly.Xml.domToWorkspace(workspace, textToDom);
-})
 
-workspace.addChangeListener(async function (event) {
-    const code = Blockly.PHP.workspaceToCode(workspace);
-    document.getElementById('textarea').value = code;
+    workspace.addChangeListener(async function (event) {
+        if (event.type == "finished_loading") {
+            waitUntilLoad = true
+            return
+        }
 
-    const xml = Blockly.Xml.workspaceToDom(workspace);
-    let domToPretty = Blockly.Xml.domToPrettyText(xml);
-    window.localStorage.setItem("routeData", domToPretty);
+        if (!waitUntilLoad) return
 
-    await axios.post('/blocky/json', {
-        data: domToPretty,
-        code: code
+        const code = Blockly.PHP.workspaceToCode(workspace);
+        document.getElementById('textarea').value = code;
+
+        const xml = Blockly.Xml.workspaceToDom(workspace);
+        let domToPretty = Blockly.Xml.domToPrettyText(xml);
+
+        await axios.post('/blocky/json', {
+            data: domToPretty,
+            code: code
+        })
     })
 })
+

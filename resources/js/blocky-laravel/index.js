@@ -1,7 +1,10 @@
 import Blockly from 'blockly';
+import Models from './Models'
 import Routes from './Routes'
+import { stringToColor } from './helper';
 
 const categories = {
+    Models,
     Routes
 }
 
@@ -18,7 +21,11 @@ for (const category in categories) {
 
     for (const component of categoryData.blocks) {
         Blockly.Blocks[component.name] = {
-            init: component.initFunction
+            secondInit: component.initFunction,
+            init: function () {
+                this.secondInit()
+                this.setColour(stringToColor(component.name));
+            }
         }
 
         Blockly.PHP[component.name] = component.code

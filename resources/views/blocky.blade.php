@@ -14,8 +14,8 @@
                 </td>
             </tr>
             <tr>
-                <td id="blocklyArea"/>
-                <td style="width:30%">
+                <td id="blocklyArea" />
+                <td style="width:40%">
                     <textarea style="width: 100%;height:100%" id="textarea"></textarea>
                 </td>
             </tr>

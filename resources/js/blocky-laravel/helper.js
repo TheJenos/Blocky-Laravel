@@ -10,3 +10,11 @@ export const stringToColor = function (str) {
     }
     return color;
 }
+
+export const switchInputs = function (block, firstBlockName, secondBlockName) {
+    const indexOfFirstBlock = block.inputList.findIndex(x => x.name == firstBlockName)
+    const indexOfSecondBlock = block.inputList.findIndex(x => x.name == secondBlockName)
+    const temp = block.inputList[indexOfSecondBlock]
+    block.inputList[indexOfSecondBlock] = block.inputList[indexOfFirstBlock]
+    block.inputList[indexOfFirstBlock] = temp
+}

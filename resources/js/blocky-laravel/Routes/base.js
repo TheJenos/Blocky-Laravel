@@ -2,7 +2,7 @@ import Blockly from 'blockly';
 import documents from '../documents';
 import { stringToColor } from '../helper';
 
-const FIELDS = ["name"];
+const FIELDS = ["variableTo", "name"];
 
 Blockly.Blocks['route_mutator'] = {
     init: function () {
@@ -19,33 +19,31 @@ Blockly.Blocks['route_mutator'] = {
 
 Blockly.Extensions.registerMutator('route_mutator', {
     connections_: Array(FIELDS.length).fill(null),
-    inputs_: Array(FIELDS.length).fill("FALSE"),
+    inputs_: {},
     mutationToDom: function () {
         var container = document.createElement('mutation');
-        for (let i = 0; i < this.inputs_.length; i++) {
-            if (this.inputs_[i] == "TRUE") {
-                container.setAttribute(FIELDS[i], this.inputs_[i]);
-            }
+        for (const key in this.inputs_) {
+            container.setAttribute(key, JSON.stringify(this.inputs_[key]));
         }
         return container;
     },
     domToMutation: function (xmlElement) {
-        for (let i = 0; i < this.inputs_.length; i++) {
-            this.inputs_[i] = xmlElement.getAttribute(FIELDS[i].toLowerCase());
+        for (const fields of FIELDS) {
+            this.inputs_[fields] = JSON.parse(xmlElement.getAttribute(fields.toLowerCase()));
         }
         this.updateShape_();
     },
     decompose: function (workspace) {
         var containerBlock = workspace.newBlock('route_mutator');
-        for (let i = 0; i < this.inputs_.length; i++) {
-            containerBlock.setFieldValue(this.inputs_[i], FIELDS[i]);
+        for (const fields of FIELDS) {
+            containerBlock.setFieldValue(this.inputs_[fields], fields);
         }
         containerBlock.initSvg();
         return containerBlock;
     },
     compose: function (containerBlock) {
-        for (let i = 0; i < this.inputs_.length; i++) {
-            this.inputs_[i] = containerBlock.getFieldValue(FIELDS[i]);
+        for (const fields of FIELDS) {
+            this.inputs_[fields] = containerBlock.getFieldValue(fields);
         }
         this.updateShape_();
         for (let i = 0; i < FIELDS.length; i++) {
@@ -63,19 +61,42 @@ Blockly.Extensions.registerMutator('route_mutator', {
         }
     },
     updateShape_: function () {
-        FIELDS.forEach(element => {
-            if (this.getInput(element)) {
-                this.removeInput(element);
-            }
-        });
-        for (let i = 0; i < this.inputs_.length; i++) {
-            if (this.inputs_[i] == "TRUE") {
-                this.appendValueInput(FIELDS[i])
-                    .setCheck('String')
-                    .setAlign(Blockly.ALIGN_RIGHT)
-                    .appendField(FIELDS[i]);
-            }
+        if (this.inputs_["variableTo"] == "TRUE") {
+            if (this.getInput('PATH_VARIABLE')) return
+            const indexOfPathInput = this.inputList.findIndex(x => x.name == "PATH")
+            this.appendDummyInput('PATH_VARIABLE')
+                .appendField('to')
+                .appendField(new Blockly.FieldTextInput(''), 'PATH_VARIABLE_INPUT')
+                .setAlign(Blockly.ALIGN_RIGHT);
+            const indexOfPathVariableInput = this.inputList.findIndex(x => x.name == "PATH_VARIABLE")
+            const temp = this.inputList[indexOfPathInput]
+            this.inputList[indexOfPathInput] = this.inputList[indexOfPathVariableInput]
+            this.inputList[indexOfPathVariableInput] = temp
+            this.removeInput('PATH');
+        } else {
+            if (this.getInput('PATH')) return
+            const indexOfPathVariableInput = this.inputList.findIndex(x => x.name == "PATH_VARIABLE")
+
+            this.appendValueInput('PATH')
+                .setCheck('String')
+                .setAlign(Blockly.ALIGN_RIGHT)
+                .appendField('to');
+            const indexOfPathInput = this.inputList.findIndex(x => x.name == "PATH")
+            const temp = this.inputList[indexOfPathVariableInput]
+            this.inputList[indexOfPathVariableInput] = this.inputList[indexOfPathInput]
+            this.inputList[indexOfPathInput] = temp
+            this.removeInput('PATH_VARIABLE');
         }
+
+        // for (let i = 0; i < this.inputs_.length; i++) {
+        //     if (this.inputs_[i] == "TRUE") {
+        //         this.appendValueInput(FIELDS[i])
+        //             .setCheck('String')
+        //             .setAlign(Blockly.ALIGN_RIGHT)
+        //             .appendField(FIELDS[i]);
+        //     }
+        // }
+
     }
 }, null, [""]);
 
@@ -85,7 +106,6 @@ export default {
         this.appendDummyInput()
             .appendField('Set a ')
             .appendField(new Blockly.FieldDropdown([
-                ['All Route', 'all'],
                 ['Get Route', 'get'],
                 ['Post Route', 'post']
             ]), 'METHOD');
@@ -94,7 +114,7 @@ export default {
             .setAlign(Blockly.ALIGN_RIGHT)
             .appendField('to');
         this.appendValueInput('RESPONE')
-            .setCheck(['String', 'route_closure', 'route_controller'])
+            .setCheck(['route_closure', 'route_controller'])
             .setAlign(Blockly.ALIGN_RIGHT)
             .appendField('for');
         this.setColour(stringToColor("route_base"));
@@ -108,7 +128,14 @@ export default {
         Blockly.PHP.definitions_['import_route'] = "use Illuminate\\Support\\Facades\\Route;"
 
         var method = block.getFieldValue('METHOD') || "all";
-        var path = Blockly.PHP.valueToCode(block, 'PATH', Blockly.PHP.ORDER_FUNCTION_CALL) || "''";
+
+        var path = "''";
+        if (block.getInput('PATH_VARIABLE')) {
+            path = `'${block.getFieldValue('PATH_VARIABLE_INPUT')}'`;
+        } else {
+            path = Blockly.PHP.valueToCode(block, 'PATH', Blockly.PHP.ORDER_FUNCTION_CALL) || "''";
+        }
+
         var response = Blockly.PHP.valueToCode(block, 'RESPONE', Blockly.PHP.ORDER_NONE) || "null";
 
         var name = Blockly.PHP.valueToCode(block, 'name', Blockly.PHP.ORDER_FUNCTION_CALL);

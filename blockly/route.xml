@@ -1,32 +1,27 @@
 <xml xmlns="https://developers.google.com/blockly/xml">
-  <block type="route_base" id="aum}V3(]x+;OuR$hx@+R" x="34" y="42">
-    <field name="METHOD">get</field>
-    <value name="PATH">
-      <block type="text" id="^%FN}TU@w?4faMKI@H^5">
-        <field name="TEXT">test1</field>
-      </block>
-    </value>
-    <value name="RESPONE">
-      <block type="route_closure" id="`GbhTcA5DeMS0@,9FSL`">
-        <statement name="CLOSURE">
-          <block type="controls_repeat_ext" id="!!/M[+.k?7}i!bi=@S6S">
-            <value name="TIMES">
-              <block type="math_number" id=")TsfoNL;(L{yO*nK]).`">
-                <field name="NUM">100</field>
+  <block type="model_base" id="{X1NQh,z`T5jm[s*LL%m" x="61" y="68">
+    <field name="MODEL_NAME">User</field>
+    <statement name="COLUMNS">
+      <block type="model_primary_key" id="h$5q2yADVL{Q5ZomW:H-">
+        <field name="INCREMENT_TYPE_INPUT">id</field>
+        <value name="BUILDER">
+          <block type="model_column_addon_autoIncrement" id="+S[K:0)H(s1^u3P+--fb">
+            <value name="BUILDER">
+              <block type="model_column_addon_comment" id="rWb]7Kjpf-!J1zkC}=SC">
+                <field name="COMMENT_INPUT"></field>
               </block>
             </value>
-            <statement name="DO">
-              <block type="text_print" id="L22PeuR_SXHj85G!R,?q">
-                <value name="TEXT">
-                  <block type="text" id="Ym07[zQ9*h$7:|(Oj]K+">
-                    <field name="TEXT">123</field>
-                  </block>
-                </value>
-              </block>
-            </statement>
           </block>
-        </statement>
+        </value>
+        <next>
+          <block type="model_column_string" id="SBUwaSsgIO[YMxQ*0EfV">
+            <field name="COLUMN_NAME_INPUT">UserName</field>
+            <next>
+              <block type="model_column_timestamp" id="gqDSKF7K%~Y4J=(5B?2a"></block>
+            </next>
+          </block>
+        </next>
       </block>
-    </value>
+    </statement>
   </block>
 </xml>
